@@ -1,6 +1,6 @@
 # create-jam-fall-2026-BQN
 
-To install, first install CBQN [on linux/mac](https://github.com/dzaima/CBQN) or
+To install, first install CBQN v0.12 [on linux/mac](https://github.com/dzaima/CBQN) or
 [on windows](cbqn-msvcrt-x86_64.zip) (For windows, you should also
 [add BQN to PATH](https://www.computerhope.com/issues/ch000549.htm)), then run
 ```
