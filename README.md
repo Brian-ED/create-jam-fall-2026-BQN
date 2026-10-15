@@ -1,4 +1,4 @@
-# create-jam-fall-2026-BQN
+# Create Jam Fall 2026 in BQN
 
 To install, first install CBQN v0.12 [on linux/mac](https://github.com/dzaima/CBQN) or
 [on windows](https://github.com/vylsaz/cbqn-win-docker-build/releases/tag/cbqn-0.12.0) (For windows, you should also
