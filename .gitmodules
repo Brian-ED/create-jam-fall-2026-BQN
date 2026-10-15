@@ -1,0 +1,3 @@
+[submodule "rayed-bqn"]
+	path = rayed-bqn
+	url = https://github.com/Brian-ED/rayed-bqn
