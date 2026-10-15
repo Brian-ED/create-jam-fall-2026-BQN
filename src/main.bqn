@@ -1,19 +1,68 @@
-⟨⟨red, white, black⟩⇐color, window, draw⟩ ← r← •Import "../rayed-bqn/rayed.bqn"
+#!/usr/bin/env bqn
 
-# sets window size to half the monitor size
-window.SetSize 0.5
+IsUpcase   ← (≥⟜'A'∧≤⟜'Z')
+IsDowncase ← (≥⟜'a'∧≤⟜'z')
+Upcase     ← (⊢-32×IsDowncase)
+Downcase   ← (⊢+32×IsUpcase)
 
-textSize ← 200
+bonkmsgs ← ⟨
+    "you bonked against a wall"
+    "the wall is sadly still there"
+    "the wall does not appear to be moving"
+    "have you tried going right? it's all the rage these days"
+    "you bonked against a wall (please go right)"
+    "you bonked against a wall (please go right)"
+    "you bonked against a wall (...)"
+⟩
 
-PerFrame ← {⟨bqn⟩𝕊𝕩:
-    textSize +↩ -´r.key.IsPressed¨ "+-"
-    middle← ⌈r.window.GetSize∘@⊸÷2
-    text ← "Hello"
-    pos ← r.raylib.MeasureTextCodepoints ⟨bqn⋄@-˜•ToUTF8 text⋄≠•ToUTF8 text⋄textSize⋄1⟩
-    ⟨white⋄bqn⋄textSize⟩ r.draw.Text (middle-pos÷2)⋈text
+state ← { 
+    pos  ⇐ 1
+    bonk ⇐ 0
+    succ ⇐ 0
+    SetP ⇐ {pos ↩𝕩}
+    SetB ⇐ {bonk↩𝕩}
+    SetS ⇐ {succ↩𝕩}
 }
 
-{𝕊:
-    ⟨r.font.LoadBQN@
-    ⟩⊸PerFrame draw._withCanvas⟜r.color.darkGreen •_While_ (¬window.ShouldClose)⟨⟩
-} window._openAs "Hello!!!"
+Tick ← {𝕊state :
+     •Out "do you want to go left or right?"
+     •term.OutRaw "> "
+     action ← •GetLine@
+     l   ← ∨´"left" ⍷action
+     r   ← ∨´"right"⍷action
+     state Act l‿r
+}
+
+Act ← {
+    state𝕊l‿r : l ∧ r ?
+    •Out "you cannot go left and right at the same time"
+    state
+    ;
+
+    state𝕊l‿r : ¬ l ∨ r ?
+    •Out "that is not a direction you can go in"
+    state
+    ;
+
+    state𝕊l‿r : l ?
+    {𝕊pos‿bonk : pos = 0 ? # going left with pos = 0 causes a bonk
+               •Out bonkmsgs ⊑˜ bonk⌊1-˜≠bonkmsgs
+               𝕩.SetB 1+bonk ⋄ 𝕩 ;
+     𝕊pos‿bonk :
+               •Out "you succesfully went left, great work!"
+               𝕩.SetP pos-1 ⋄ 𝕩
+    } state
+    ;
+    state𝕊l‿r : r ?
+    {𝕊pos‿bonk : pos ≥ 5 ?
+               •Out "you have found a thing!"
+               𝕩.SetS 1 ⋄ 𝕩;
+     𝕊pos‿bonk :
+               •Out "you succesfully went right, great work!"
+               𝕩.SetP 1+pos ⋄ 𝕩
+    } state
+    ;
+    state𝕊l‿r : !"what the fuck bro"
+}
+
+Tick•_while_{𝕊⟨succ⟩ : ¬succ} State@
