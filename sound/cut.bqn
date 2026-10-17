@@ -7,17 +7,16 @@ rec ← ⌊‿sec ⥊ in↓ ⊏wav.Read "tiles_A.wav"
 seq ← "ABAGACDECACFCCDG"
 
 Sequence ← { 𝕊 arg:
-  n ← ≠ p ← 2↕seq
-  j ← {R w:
-    n ← ≠s ← w↕seq
-    i ← s ⊐ w↕arg
-    {∧´i=n? i ;
-      a ← n-1
-      t ← a ∾˜ R w+1
-      d ← t-(t-1+¯1⌽t)×<`t<a
-      i+(d-i)×d<a
-    }
-  } 1
-  ⥊ j ⊏ rec
+  # Find sequence with fewest cuts, by dynamic programming
+  # At each step, s contains the best sequence for each ending segment
+  c ← ⋈0  # Cost (in cuts) relative to best sequence: always 0 or 1
+  s‿·‿b ← ⟨⋈↕0, ⋈¯1, 0⟩ {𝕨𝕊s‿e‿b:  # sequences, endings, best index
+    i ← (e+1)⊐𝕨     # Predecessor without a cut, if any
+    l ← i=≠e
+    p ← b¨⌾(l⊸/) i  # Predecessor to use
+    c ↩ ∧´⊸< l∨p⊏c  # Where l=1, p=b⊑c which is 0, so l+p⊏c is l∨p⊏c
+    ⟨(p⊏s) ∾¨ 𝕨, 𝕨, ⊑⍋c⟩
+  }´⌽ 𝕩 ⊏⟜⊔○(-⟜'A') seq
+  ⥊ (b⊑s) ⊏ rec
 }
 "/tmp/test.wav" wav.Write˜ Sequence "CCABADDECCFGACED"
