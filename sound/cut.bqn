@@ -7,21 +7,14 @@ rec ← ⌊‿sec ⥊ in↓ ⊏wav.Read "tiles_A.wav"
 seq ← "ABAGACDECACFCCDG"
 
 Sequence ← {
-  # Find sequence with fewest cuts, by dynamic programming
-  # At each step we store one overall best sequence explicitly,
-  # and one best for each specific ending e implicitly, with l
-  e ← ⋈¯1  # Possible endings
-  l ← ⋈0   # Length of suffixes that lead into them
-  c ← ⋈0   # Cost (in cuts) relative to best sequence: always 0 or 1
-  j ← (↕0) {
-    i ← (e+1) ⊐ 𝕨
-    e ↩ 𝕨
-    l ↩ 1 + i ⊏ l∾0
-    c ↩ ∧´⊸< i ⊏ c∾1  # ∧´⊸< so best stays at 0 (otherwise need c∾1+⌊´c)
-    b ← ⊑⍋c           # Index of best
-    s ← (b⊑e) -⌽↕ b⊑l # Corresponding suffix
-    ((1-≠s)↓𝕩) ∾ s
-  }´⌽ 𝕩 ⊏⟜⊔○(-⟜'A') seq
+  # Find a sequence with the fewest cuts
+  # Index and length of a longest-possible unbroken suffix at each position
+  l ← 0¨𝕩
+  [n,i] ← ⍉ {m←⌈´l↩𝕩×1+»l ⋄ ⟨m,⊑l⊐m⟩}˘ 𝕩=⌜seq
+  # Remove overlaps, breaking ties towards later sequences
+  i‿n /¨˜↩< ≥⟜« {𝕨(-+𝕩×=)1}`⌾⌽ n
+  # Assemble the chosen sequences
+  j ← (⊒/n) + n/i¬n
   ⥊ j ⊏ rec
 }
 "/tmp/test.wav" wav.Write˜ Sequence "CCABADDECCFGACED"
