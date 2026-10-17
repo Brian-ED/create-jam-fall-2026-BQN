@@ -3,7 +3,10 @@ o.SetFreq 48e3 ⋄ o.SetFBytes •fbytes
 wav ← o •Import "../rayed-bqn/imports/BQNoise/wav.bqn"
 in‿sec ← 8‿16 × beat ← ⌊0.5+(60×48e3)÷4×110
 
-rec ← ⌊‿sec ⥊ in↓ ⊏wav.Read "tiles_A.wav"
+ov ← 500
+rec ← (in-ov) ↓ ⊏wav.Read "tiles_A.wav"
+main ← <˘ ⌊‿sec ⥊ rec
+over ← ov ↑¨ ⟨(+´≠¨main)↓rec⟩ « main  # ov samples after each section
 seq ← "ABAGACDECACFCCDG"
 
 Sequence ← {
@@ -15,7 +18,8 @@ Sequence ← {
   i‿n /¨˜↩< ≥⟜« {𝕨(-+𝕩×=)1}`⌾⌽ n
   # Assemble the chosen sequences
   j ← (⊒/n) + n/i¬n
-  ⥊ j ⊏ rec
+
+  ∾ (⟨ov⥊0⟩»j⊏over) (⊣-(↕⊸÷ov)×-)⌾(ov⊸↑)¨ j⊏main
 }
 
 gh ← "AB"∾(>⥊⋈⌜˜"AC")
