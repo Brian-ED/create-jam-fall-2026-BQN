@@ -6,17 +6,22 @@ in‿sec ← 8‿16 × beat ← ⌊0.5+(60×48e3)÷4×110
 rec ← ⌊‿sec ⥊ in↓ ⊏wav.Read "tiles_A.wav"
 seq ← "ABAGACDECACFCCDG"
 
-Sequence ← { 𝕊 arg:
+Sequence ← {
   # Find sequence with fewest cuts, by dynamic programming
-  # At each step, s contains the best sequence for each ending segment
-  c ← ⋈0  # Cost (in cuts) relative to best sequence: always 0 or 1
-  s‿·‿b ← ⟨⋈↕0, ⋈¯1, 0⟩ {𝕨𝕊s‿e‿b:  # sequences, endings, best index
-    i ← (e+1)⊐𝕨     # Predecessor without a cut, if any
-    l ← i=≠e
-    p ← b¨⌾(l⊸/) i  # Predecessor to use
-    c ↩ ∧´⊸< l∨p⊏c  # Where l=1, p=b⊑c which is 0, so l+p⊏c is l∨p⊏c
-    ⟨(p⊏s) ∾¨ 𝕨, 𝕨, ⊑⍋c⟩
+  # At each step we store one overall best sequence explicitly,
+  # and one best for each specific ending e implicitly, with l
+  e ← ⋈¯1  # Possible endings
+  l ← ⋈0   # Length of suffixes that lead into them
+  c ← ⋈0   # Cost (in cuts) relative to best sequence: always 0 or 1
+  j ← (↕0) {
+    i ← (e+1) ⊐ 𝕨
+    e ↩ 𝕨
+    l ↩ 1 + i ⊏ l∾0
+    c ↩ ∧´⊸< i ⊏ c∾1  # ∧´⊸< so best stays at 0 (otherwise need c∾1+⌊´c)
+    b ← ⊑⍋c           # Index of best
+    s ← (b⊑e) -⌽↕ b⊑l # Corresponding suffix
+    ((1-≠s)↓𝕩) ∾ s
   }´⌽ 𝕩 ⊏⟜⊔○(-⟜'A') seq
-  ⥊ (b⊑s) ⊏ rec
+  ⥊ j ⊏ rec
 }
 "/tmp/test.wav" wav.Write˜ Sequence "CCABADDECCFGACED"
