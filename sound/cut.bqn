@@ -9,7 +9,7 @@ seq ← "ABAGACDECACFCCDG"
 Sequence ← {
   # Find a sequence with the fewest cuts
   # Index and length of a longest-possible unbroken suffix at each position
-  l ← 0¨𝕩
+  l ← 0¨seq
   [n,i] ← ⍉ {m←⌈´l↩𝕩×1+»l ⋄ ⟨m,⊑l⊐m⟩}˘ 𝕩=⌜seq
   # Remove overlaps, breaking ties towards later sequences
   i‿n /¨˜↩< ≥⟜« {𝕨(-+𝕩×=)1}`⌾⌽ n
@@ -17,4 +17,10 @@ Sequence ← {
   j ← (⊒/n) + n/i¬n
   ⥊ j ⊏ rec
 }
-"/tmp/test.wav" wav.Write˜ Sequence "CCABADDECCFGACED"
+
+gh ← "AB"∾(>⥊⋈⌜˜"AC")
+gx ← gh ∾ >⥊"ACE"⋈⌜"DFG"
+grp ← gh (∾˝∾⎉1⎉1‿∞) gx∾"DE"∾"DF"≍˘'G'
+_similar ← {s←×˝˘(2«3¨𝕩)⊸⋆˘𝕩⊸=˘𝕨 ⋄ ⥊𝕩∾𝕨⊏˜(+`s)⍋(𝕗-1)•rand.Range+´s}
+base ← gx 2 _similar •rand.Range∘≠⊸⊏ gh
+"/tmp/test.wav" wav.Write˜ Sequence •Show grp 7 _similar base
