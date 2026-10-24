@@ -22,8 +22,8 @@ Button ← {
         textX ← ⌊(0⊑pos + (0⊑size - 0⊑textSize) ÷ 2)
         textY ← ⌊(1⊑pos + (1⊑size - 1⊑textSize) ÷ 2)
 
-        color r.draw.Rectangle pos⊸+⊸≍size
-        r.color.black‿font‿fontSize r.draw.Text textX‿textY⋈title 
+        color r.draw.Rectangle +`pos≍size
+        r.color.black‿font‿fontSize r.draw.Text textX ‿textY ⋈title 
     }
     Update ⇐ {𝕊: {
             r.raylib.CheckCollisionPointRec ⟨ r.mouse.GetPos@ ⋄ pos∾size ⟩  ? isHovered ↩ 1 ; isHovered ↩ 0
