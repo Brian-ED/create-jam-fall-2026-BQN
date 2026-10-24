@@ -2,8 +2,8 @@
 # from color take out red, white and black
 ⟨⟨red, white, black⟩⇐color, window, draw⟩←r←•Import "../rayed-bqn/rayed.bqn"
 
-•Import⍟(¬•file.Exists∘"../sound/mix.wav") "../sound/mix.bqn"
-soundMixFile ← •file.Realpath "../sound/mix.wav"
+#•Import⍟(¬•file.Exists∘"../sound/mix.wav") "../sound/mix.bqn"
+#soundMixFile ← •file.Realpath "../sound/mix.wav"
 
 GetHillVertices ← {𝕊:
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ hillLineCount •rand.Range angleRandomness
@@ -92,8 +92,9 @@ UnloadAssets ← { 𝕊@:
        r.texture.Unload speedometer_texture
        r.texture.Unload needle_texture
        r.texture.Unload boulder_texture
-       r.raylib.UnloadWave soundMixWav
-       r.raylib.UnloadSound soundMix
+       #r.raylib.UnloadWave soundMixWav
+       #r.raylib.UnloadSound soundMix
+       r.raylib.CloseAudioDevice⟨⟩
 }
 
 Setup ← { 𝕊@:
@@ -157,15 +158,18 @@ DrawBoulder ← { x‿y𝕊angle : 10
     x‿y‿angle‿boulder_scale DrawTextureCentered boulder_texture
 }
 
+r.raylib.SetTraceLogLevel r.raylib.traceLogLevel.log_all
 PerFrame ← {𝕊:
     # First frame does setup
     {frame ≡ 0?
+        r.raylib.SetTraceLogLevel r.raylib.traceLogLevel.log_all
         screenSize ↩ r.monitor.Size@
         center ↩ 2÷˜screenSize-radius
         font↩r.font.LoadBQN@
-        soundMixWav ↩ r.raylib.LoadWave soundMixFile
-        soundMix ↩ r.raylib.LoadSoundFromWave soundMixWav
-        r.raylib.PlaySound soundMix
+        r.raylib.InitAudioDevice⟨⟩
+        #soundMixWav ↩ r.raylib.LoadWave soundMixFile
+        #soundMix ↩ r.raylib.LoadSoundFromWave soundMixWav
+        #r.raylib.PlaySound soundMix
     ;@}
     #textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ •Repr speed ⋄ 20 ⋄ 0 ⟩
     #⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨(textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄•Repr speed⟩
