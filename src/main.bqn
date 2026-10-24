@@ -54,7 +54,7 @@ font ← @
 needle_texture ← @
 speedometer_texture ← @
 boulder_texture ← @
-
+dirt_texture ← @
     
 
 # scale at which to draw the boulder and speedometer textures
@@ -83,6 +83,7 @@ LoadAssets ← { 𝕊@:
     needle_texture ↩ TL "../assets/speedometer_needle.png"
     speedometer_texture ↩ TL "../assets/speedometer.png"
     boulder_texture ↩ TL "../assets/boulder.png"
+    dirt_texture ↩ TL "../assets/dirt.png"
 }
 
 # unload all loaded assets
@@ -92,6 +93,7 @@ UnloadAssets ← { 𝕊@:
        r.texture.Unload speedometer_texture
        r.texture.Unload needle_texture
        r.texture.Unload boulder_texture
+       r.texture.Unload dirt_texture
        #r.raylib.UnloadWave soundMixWav
        #r.raylib.UnloadSound soundMix
        r.raylib.CloseAudioDevice⟨⟩
