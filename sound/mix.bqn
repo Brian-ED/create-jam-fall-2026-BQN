@@ -27,7 +27,7 @@ pattern ← lvl {{¯1¨⌾(𝕨⊸/)𝕩}⟜𝕩˘ (↕8)<⌜0⌈𝕨}¨ pat
 
 # Assemble drums
 PinkDiff ← {𝕩 ↑ ⥊∘⍉∘≍´⌽ -⟜«∘(-⟜¬o.RandFloats)¨ (1⌈↕∘⌈)⌾(2⋆⁼⊢)2⌈𝕩}
-n ← ≠⊑pat ⋄ len ← n×beat
+n ← ≠⊑pat ⋄ len ⇐ n×beat
 bl ← {⌊0.5+len×÷⟜(⊢´)𝕩}⌾(+`) beat × 1 + 100 ÷˜ PinkDiff n
 ! len = +´bl
 Seq ← { m ← 0≤𝕩 ⋄ ∾≍ (+´¨ m+`⊸⊔bl) ↑⎉1¨ ⟨2‿0⥊0⟩∾𝕨⊏˜m/𝕩 }
@@ -39,4 +39,4 @@ g ←                                          off ↓ ⊏wav.Read "guitar.wav"
 b ← {(0.75×𝕩)+8÷˜•math.Tanh 32×𝕩}⌾(÷⟜(2⋆15)) off ↓ ⊏wav.Read "bass.wav"
 
 # Generate a segment: 𝕩 is density, 0 to 7
-{ (𝕩⊏d) +⎉1 g +○(len↑(𝕩×len)↓⊢) b }
+Gen ⇐ { (𝕩⊏d) +⎉1 g +○(len↑(𝕩×len)↓⊢) b }
