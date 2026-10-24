@@ -53,16 +53,21 @@ obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
 pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
 
 PerFrame ← {𝕊:
+
+    # First frame does setup
     {frame ≡ 0?
       screenSize ↩ r.monitor.Size@
       center ↩ 2÷˜screenSize-radius
     }
+
+    # Hill moves backwards for forward movement
     hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed
+    
+    # Gravity and floor collision
     {CheckCollision hillPosition?
         gravityAcceleration ↩ 0
         gravitySpeed ↩ 0
     ;
-        # Gravity
         gravityAcceleration +↩ 0.02
         gravitySpeed +↩ 0.6×gravityAcceleration
         hillPosition -⟜gravitySpeed⌾(1⊸⊑)↩
@@ -85,14 +90,18 @@ PerFrame ← {𝕊:
         pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
     }
 
+    # Draw boulder character
     r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
 
+    # Drawing blcak sector for timing window
     r.raylib.DrawCircleSector ⟨center⋄radius×0.8⋄80⋄100⋄1⋄r.color.black⟩
     r.raylib.DrawCircleSector ⟨center⋄radius×0.7⋄80⋄100⋄1⋄r.color.red⟩
 
+    # Drawing white clock hand for when to hit timing window
     scale ← 0.1
     ⟨4⥊255, 5⟩ r.draw.Line ≍⟜(+⟜(timingHeadAngle Spin˜ ∾˜radius)) center
 
+    # Drawing hill and obstacles
     r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
 
