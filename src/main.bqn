@@ -6,13 +6,30 @@ CheckCollisionRay2dCircle ← {direction𝕊center‿radius: c‿r←𝕩 # v2 �
   𝕨×⍟(0⊸≠)¨˜-0⌊(0⊸<◶¯∞‿√r×˜⊸-·+´∘×˜c-𝕨×⊢)⌾((0⌈+´𝕨×c)⊸+)0
 }
 
-pos ← 100‿100
+circle_height ← 10
 radius ← 100
 
-PerFrame ← {𝕤
-    screenSize←r.monitor.Size@
-    r.raylib.DrawCircleV ⟨ pos ⋄ radius ⋄ red⟩
-    r.color.green draw.Triangle [0‿0 ⋄ 0∾⊑screenSize ⋄ screenSize]
+frame ← 0
+screenSize ← 0‿0
+hillDetail ← 100
+lineCount ← 40
+angleRandomness ← 20
+
+lines ← {
+    randomAngles ← (⌊÷⟜2 angleRandomness) -˜ lineCount •rand.Range angleRandomness
+    followAngles ← ¯45+`randomAngles
+    asMats ← r.math.MatrixRotate2D¨ r.math.deg2rad× followAngles
+    linesAtAnglesFormHill ← r.math.MP⟜0‿hillDetail¨ asMats
+    2↕ 0‿0+`>linesAtAnglesFormHill
+}
+
+PerFrame ← {𝕊:
+    {frame ≡ 0?
+      screenSize↩r.monitor.Size@
+    }
+    r.raylib.DrawCircleV ⟨ circle_height+2÷˜screenSize-radius ⋄ radius ⋄ red⟩
+    ⟨r.color.green⋄10⟩⊸r.draw.Line lines
+#    r.color.green draw.Triangle [0‿0 ⋄ 0∾⊑screenSize ⋄ screenSize]
 
 }draw._withCanvas⟜r.color.lightblue
 
