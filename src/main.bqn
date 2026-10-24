@@ -20,7 +20,7 @@ lines ← {
     followAngles ← ¯45+`randomAngles
     asMats ← r.math.MatrixRotate2D¨ r.math.deg2rad× followAngles
     linesAtAnglesFormHill ← r.math.MP⟜0‿hillDetail¨ asMats
-    2↕ 0‿0+`>linesAtAnglesFormHill
+    2↕ 0‿0∾0‿0+`>linesAtAnglesFormHill
 }
 
 PerFrame ← {𝕊:
@@ -28,7 +28,7 @@ PerFrame ← {𝕊:
       screenSize↩r.monitor.Size@
     }
     r.raylib.DrawCircleV ⟨ circle_height+2÷˜screenSize-radius ⋄ radius ⋄ red⟩
-    ⟨r.color.green⋄10⟩⊸r.draw.Line lines
+    {r.color.green⊸r.draw.Triangle 𝕩∾0∾1⊑screenSize}⎉2 lines
 #    r.color.green draw.Triangle [0‿0 ⋄ 0∾⊑screenSize ⋄ screenSize]
 
 }draw._withCanvas⟜r.color.lightblue
