@@ -14,7 +14,7 @@ angleRandomness ← 20
 
 lines ← {
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ lineCount •rand.Range angleRandomness
-    followAngles ← ¯45+`randomAngles
+    followAngles ← ¯45(¯75⌈¯35⌊+)`randomAngles
     asMats ← r.math.MatrixRotate2D¨ r.math.deg2rad× followAngles
     linesAtAnglesFormHill ← r.math.MP⟜0‿hillDetail¨ asMats
     2↕ 0‿0∾0‿0+`>linesAtAnglesFormHill
