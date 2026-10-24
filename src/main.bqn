@@ -23,12 +23,15 @@ lines ← {
     2↕ 0‿0∾0‿0+`>linesAtAnglesFormHill
 }
 
+hillAsTriangles ← @
+
 PerFrame ← {𝕊:
     {frame ≡ 0?
       screenSize↩r.monitor.Size@
+      hillAsTriangles↩∾⟜(0∾1⊑screenSize)⎉2 lines
     }
     r.raylib.DrawCircleV ⟨ circle_height+2÷˜screenSize-radius ⋄ radius ⋄ red⟩
-    {r.color.green⊸r.draw.Triangle 𝕩∾0∾1⊑screenSize}⎉2 lines
+    {r.color.green⊸r.draw.Triangle 𝕩}⎉2 hillAsTriangles
 #    r.color.green draw.Triangle [0‿0 ⋄ 0∾⊑screenSize ⋄ screenSize]
 
 }draw._withCanvas⟜r.color.lightblue
