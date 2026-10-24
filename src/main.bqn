@@ -50,6 +50,7 @@ gravitySpeed ← 0
 timingHeadAngle ← 90
 
 obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
+pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
 
 PerFrame ← {𝕊:
     {frame ≡ 0?
@@ -79,6 +80,9 @@ PerFrame ← {𝕊:
 
         hillBottomLeft ↩ (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
         hillAsTriangles ↩ ∾⟜hillBottomLeft⎉2 lines
+
+        obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
+        pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
     }
 
     r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
