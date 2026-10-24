@@ -61,23 +61,6 @@ DrawTextureCentered ← { x‿y‿a‿s 𝕊 tex :
 # load all assets
 # if you add have any extra assets
 # put their loading here and their unloading in UnloadAll
-LoadAll ← { 𝕊@:
-    Tl ← r.texture.Load∘•file.At
-    {
-        font ⇐ r.font.LoadBQN@
-        needle_texture ⇐ Tl "../assets/speedometer_needle.png"
-        speedometer_texture ⇐ Tl "../assets/speedometer.png"
-        boulder_texture ⇐ Tl "../assets/boulder.png"
-    }
-}
-
-# unload all loaded assets form an asset namespace
-UnloadAll ← { 𝕊a :
-       r.font.Unload a.font
-       r.texture.Unload a.speedometer_texture
-       r.texture.Unload a.needle_texture
-       r.texture.Unload a.boulder_texture
-}
 
 # x and y to draw the speedometer at (center)
 # speedometer texture

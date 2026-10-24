@@ -12,21 +12,6 @@ GetHillVertices ← {𝕊:
 
 CheckCollision ← {𝕊:∨´{r.raylib.CheckCollisionCircleLine ⟨center⋄radius⋄𝕨⋄𝕩⟩}˝⎉2  𝕩⊸+⎉1 lines}
 
-# takes width and height of texture, and angle by which you want it to
-# rotate around its center
-# returns delta x and delta y by which to translate it to make the
-# rotation look like it was from the center
-Spin ← { w‿h𝕊a :
-     # ie the distance between the center of the image and the topleft
-     # corner of the image, rotated by angle a
-     # a is in degrees so
-     ar ← π × a ÷ 180 
-     as‿ac ← ⟨•math.Sin ar, •math.Cos ar⟩
-     dx ← (ac×w÷2) - (as×h÷2)
-     dy ← (ac×h÷2) + (as×w÷2)  
-     dx‿dy
-}
-
 radius ← 100
 hillDetail ← 100
 hillLineCount ← 200  # hillLineCount × hillDetail = hillLength
@@ -48,12 +33,120 @@ speed ← 10
 gravityAcceleration ← 10
 gravitySpeed ← 0
 timingHeadAngle ← 90
+angle ← 0
 
 obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
 pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
 
-PerFrame ← {𝕊:
+# speedometer&Co.
+# putting everything in the toplevel so my asset loading style and
+# yours don't clash
+font ← @
+needle_texture ← @
+speedometer_texture ← @
+boulder_texture ← @
 
+    
+
+# scale at which to draw the boulder and speedometer textures
+# initialized empty since computing them depends on the textures
+# being loaded, which depends on the window having been started
+# initialized in setup function after we load all assets
+boulder_scale ← @
+speedometer_scale ← @
+
+
+# a texture id‿width‿height‿mipmaps‿format 
+# to isolate width‿height we do
+TexSize ← {2↑1↓𝕩}
+
+# loads assets into global variables
+# we can't initialize font&Co. in the toplevel since font loading&Co.
+# need the raylib window to be active to work, so we'll have to load
+# assets *after* opening the window, ie: not here
+LoadAssets ← { 𝕊@:
+    # texture.Load needs absolute paths
+    # •file.At turns relative paths it receives into absolute
+    # idk if that's a documented thing, but it works
+    # so I'll depend on it, if it breaks on windows then whoops
+    TL ← r.texture.Load∘•file.At
+    font ↩ r.font.LoadBQN@
+    needle_texture ↩ TL "../assets/speedometer_needle.png"
+    speedometer_texture ↩ TL "../assets/speedometer.png"
+    boulder_texture ↩ TL "../assets/boulder.png"
+}
+
+# unload all loaded assets
+# this is our teardown function
+UnloadAssets ← { 𝕊@:
+       r.font.Unload font
+       r.texture.Unload speedometer_texture
+       r.texture.Unload needle_texture
+       r.texture.Unload boulder_texture
+}
+
+Setup ← { 𝕊@:
+    LoadAssets@
+    # we should probably crop the boulder
+    # texture width is currently not quite border display size
+    # I'm adding a multiplication by 0.8 as a hack
+    boulder_scale ↩ {
+        # width and height of the texture
+        bw‿bh ← TexSize boulder_texture
+        # radius is half the rock's width
+        br ← 0.8 × bw ÷ 2
+        radius ÷ br
+    }
+    speedometer_scale ↩ {
+        speedometer_radius ← 100 # to be parameterized better later
+        sw‿sh ← TexSize speedometer_texture
+        sr ← sw ÷ 2
+        speedometer_radius ÷ sw
+    }
+
+}
+
+Teardown ← {𝕊@:
+    UnloadAssets@
+}
+
+
+# raylib rotates textures around their top left corner
+# we want to rotate the texture around its center, so we need to
+# translate the texture after the rotation
+# function to compute the offset we need to translate by
+# width height 𝕊 angle
+Spin ← { w‿h𝕊a :
+     ar ← π × a ÷ 180 # raylib angles are degrees, •math.Sin and •math.Cos want radians
+     as‿ac ← ⟨•math.Sin ar, •math.Cos ar⟩
+     dx ← (ac×w÷2) - (as×h÷2)
+     dy ← (ac×h÷2) + (as×w÷2)  
+     dx‿dy
+}
+
+DrawTextureCentered ← { x‿y‿angle‿scale 𝕊 tex :
+    tw‿th ← scale × TexSize tex
+    off ← tw‿th Spin angle
+    r.color.white‿tex‿scale‿angle r.draw.Texture x‿y - off
+}
+
+DrawSpeedometer ← { x‿y 𝕊 speed :
+    # turn tartget speed to display from speed into needle angle
+    # for how we draw the speedometer
+    # 0 is 180 degrees (raylib uses degrees)
+    # 100 is 0 degrees
+    # and plus the needle texture is already at 90 degrees
+    needle_angle ← 90 + 180 × 100 ÷˜ speed - 100
+    
+    x‿y‿0‿speedometer_scale DrawTextureCentered speedometer_texture
+    x‿y‿needle_angle‿speedometer_scale DrawTextureCentered needle_texture
+}
+
+DrawBoulder ← { x‿y𝕊angle : 10
+    x‿y‿angle‿boulder_scale DrawTextureCentered boulder_texture
+}
+
+PerFrame ← {𝕊:
     # First frame does setup
     {frame ≡ 0?
       screenSize ↩ r.monitor.Size@
@@ -90,10 +183,18 @@ PerFrame ← {𝕊:
         pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
     }
 
-    # Draw boulder character
-    r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
+    # Drawing boulder character
+    center DrawBoulder angle
+    # TODO: is this ok? should we sync this with timingHeadAngle?
+    angle ↩ 360 | speed + angle
 
-    # Drawing blcak sector for timing window
+
+    # Drawing speedometer
+    # TODO: idk what speed are we supposed to give it
+    # gravitySpeed is variable enough that it looks like a speedometer
+    (10×gravitySpeed) DrawSpeedometer˜ ⌊∘(÷⟜3)⌾(1⊸⊑)center
+
+    # Drawing black sector for timing window
     r.raylib.DrawCircleSector ⟨center⋄radius×0.8⋄80⋄100⋄1⋄r.color.black⟩
     r.raylib.DrawCircleSector ⟨center⋄radius×0.7⋄80⋄100⋄1⋄r.color.red⟩
 
@@ -108,4 +209,9 @@ PerFrame ← {𝕊:
     timingHeadAngle+↩2
 }draw._withCanvas⟜r.color.lightblue
 
-PerFrame•_While_(¬window.ShouldClose)window._openAs "Hello!!!"
+{𝕊:
+    Setup@
+    PerFrame•_While_(¬window.ShouldClose) 0
+    Teardown@
+} window._openAs "Hello!!!"
+
