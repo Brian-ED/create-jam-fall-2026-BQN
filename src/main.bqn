@@ -59,7 +59,6 @@ PerFrame ← {𝕊:
 
     # generate future hill
     {¬ (-1⊑hillPosition)>1⊑(⌊2÷˜≠)⊸⊏hillVertices? @;
-        •Show "hi?"
         hillVertices↩((⌊2÷˜≠)⊸↓hillVertices)∾(•Show ⊢˝hillVertices)⊸+˘ (⌊2÷˜≠)⊸↑GetHillVertices@
         lines ↩ 2↕hillVertices
 
