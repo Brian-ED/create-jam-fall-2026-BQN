@@ -2,6 +2,9 @@
 # from color take out red, white and black
 ⟨⟨red, white, black⟩⇐color, window, draw⟩←r←•Import "../rayed-bqn/rayed.bqn"
 
+•Import⍟(¬•file.Exists∘"../sound/mix.wav") "../sound/mix.bqn"
+soundMixFile ← •file.Realpath "../sound/mix.wav"
+
 GetHillVertices ← {𝕊:
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ hillLineCount •rand.Range angleRandomness
     followAngles ← ¯45(¯75⌈¯35⌊+)`randomAngles
@@ -39,6 +42,10 @@ angle ← 0
 
 obstacles ← (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
 pickups ← (0=(20⥊1)»distanceBetweenPickups|↕∘≠)⊸/hillVertices
+
+# Stores mix.wav
+soundMixWav ← @
+soundMix ← @
 
 # speedometer&Co.
 # putting everything in the toplevel so my asset loading style and
@@ -85,6 +92,8 @@ UnloadAssets ← { 𝕊@:
        r.texture.Unload speedometer_texture
        r.texture.Unload needle_texture
        r.texture.Unload boulder_texture
+       r.raylib.UnloadWave soundMixWav
+       r.raylib.UnloadSound soundMix
 }
 
 Setup ← { 𝕊@:
@@ -154,6 +163,9 @@ PerFrame ← {𝕊:
         screenSize ↩ r.monitor.Size@
         center ↩ 2÷˜screenSize-radius
         font↩r.font.LoadBQN@
+        soundMixWav ↩ r.raylib.LoadWave soundMixFile
+        soundMix ↩ r.raylib.LoadSoundFromWave soundMixWav
+        r.raylib.PlaySound soundMix
     ;@}
     #textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ •Repr speed ⋄ 20 ⋄ 0 ⟩
     #⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨(textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄•Repr speed⟩
@@ -177,11 +189,10 @@ PerFrame ← {𝕊:
     }
 
     # Hit obstacle
-    {(radius+⊑center-hillPosition) >○•Show ⊑nextObstacleIndex⊏obstacles ?
+    {(radius+⊑center-hillPosition) > ⊑nextObstacleIndex⊏obstacles ?
         speed -↩ •rand.Range 10
         nextObstacleIndex((≠obstacles)|+)↩1
     ;@}
-    •Show speed
 
     # generate future hill
     {¬ (-1⊑hillPosition)>1⊑(⌊2÷˜≠)⊸⊏hillVertices? @;
