@@ -8,9 +8,6 @@ CheckCollisionRay2dCircle ← {direction𝕊center‿radius: c‿r←𝕩 # v2 �
 
 circle_height ← 10
 radius ← 100
-
-frame ← 0
-screenSize ← 0‿0
 hillDetail ← 100
 lineCount ← 40
 angleRandomness ← 20
@@ -23,7 +20,12 @@ lines ← {
     2↕ 0‿0∾0‿0+`>linesAtAnglesFormHill
 }
 
+# Calculated at frame 1
 hillAsTriangles ← @
+
+# Runtime variables
+screenSize ← @
+frame ← 0
 
 PerFrame ← {𝕊:
     {frame ≡ 0?
@@ -32,8 +34,6 @@ PerFrame ← {𝕊:
     }
     r.raylib.DrawCircleV ⟨ circle_height+2÷˜screenSize-radius ⋄ radius ⋄ red⟩
     {r.color.green⊸r.draw.Triangle 𝕩}⎉2 hillAsTriangles
-#    r.color.green draw.Triangle [0‿0 ⋄ 0∾⊑screenSize ⋄ screenSize]
-
 }draw._withCanvas⟜r.color.lightblue
 
 PerFrame•_While_(¬window.ShouldClose)window._openAs "Hello!!!"
