@@ -17,6 +17,7 @@ hillDetail ← 100
 hillLineCount ← 200  # hillLineCount × hillDetail = hillLength
 angleRandomness ← 20
 distanceBetweenObstacles ← 40
+distanceBetweenPickups ← 40
 
 hillVertices←GetHillVertices@
 lines ← 2↕hillVertices
@@ -25,18 +26,19 @@ hillBottomLeft ← (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
 hillAsTriangles ← ∾⟜hillBottomLeft⎉2 lines
 
 # Runtime variables
+nextObstacleIndex←0
 center ← @ # Runtime because screen size changes midddle
 screenSize ← @
 frame ← 0
 hillPosition ← 0‿0 # height ‿ rightMovement
 speed ← 10
-gravityAcceleration ← 10
+gravityAcceleration ← 0
 gravitySpeed ← 0
 timingHeadAngle ← 90
 angle ← 0
 
-obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
-pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
+obstacles ← (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
+pickups ← (0=(20⥊1)»distanceBetweenPickups|↕∘≠)⊸/hillVertices
 
 # speedometer&Co.
 # putting everything in the toplevel so my asset loading style and
@@ -149,13 +151,16 @@ DrawBoulder ← { x‿y𝕊angle : 10
 PerFrame ← {𝕊:
     # First frame does setup
     {frame ≡ 0?
-      screenSize ↩ r.monitor.Size@
-      center ↩ 2÷˜screenSize-radius
-    }
+        screenSize ↩ r.monitor.Size@
+        center ↩ 2÷˜screenSize-radius
+        font↩r.font.LoadBQN@
+    ;@}
+    #textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ •Repr speed ⋄ 20 ⋄ 0 ⟩
+    #⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨(textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄•Repr speed⟩
 
     # Hill moves backwards for forward movement
     hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed
-    
+
     # Gravity and floor collision
     {CheckCollision hillPosition?
         gravityAcceleration ↩ 0
@@ -171,9 +176,16 @@ PerFrame ← {𝕊:
         ;@}
     }
 
+    # Hit obstacle
+    {(radius+⊑center-hillPosition) >○•Show ⊑nextObstacleIndex⊏obstacles ?
+        speed -↩ •rand.Range 10
+        nextObstacleIndex((≠obstacles)|+)↩1
+    ;@}
+    •Show speed
+
     # generate future hill
     {¬ (-1⊑hillPosition)>1⊑(⌊2÷˜≠)⊸⊏hillVertices? @;
-        hillVertices↩((⌊2÷˜≠)⊸↓hillVertices)∾(•Show ⊢˝hillVertices)⊸+˘ (⌊2÷˜≠)⊸↑GetHillVertices@
+        hillVertices↩((⌊2÷˜≠)⊸↓hillVertices)∾(⊢˝hillVertices)⊸+˘ (⌊2÷˜≠)⊸↑GetHillVertices@
         lines ↩ 2↕hillVertices
 
         hillBottomLeft ↩ (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
@@ -190,9 +202,7 @@ PerFrame ← {𝕊:
 
 
     # Drawing speedometer
-    # TODO: idk what speed are we supposed to give it
-    # gravitySpeed is variable enough that it looks like a speedometer
-    (10×gravitySpeed) DrawSpeedometer˜ ⌊∘(÷⟜3)⌾(1⊸⊑)center
+    (10×speed) DrawSpeedometer˜ ⌊∘(÷⟜3)⌾(1⊸⊑)center
 
     # Drawing black sector for timing window
     r.raylib.DrawCircleSector ⟨center⋄radius×0.8⋄80⋄100⋄1⋄r.color.black⟩
@@ -207,11 +217,37 @@ PerFrame ← {𝕊:
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
 
     timingHeadAngle+↩2
+    frame+↩1
 }draw._withCanvas⟜r.color.lightblue
+
+GameOver ← {𝕊:
+    {𝕊:
+        loseTitle ← "You Lose"‿"You're too slow to go on"
+        {𝕊:
+            textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ 𝕨 ⋄ 20 ⋄ 0 ⟩
+            ⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨ 0‿(40×𝕩)+ (textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄𝕨⟩
+        }¨⟜(↕≠) loseTitle
+        r.raylib.EndDrawing⟨⟩
+    }draw._withCanvas r.color.red
+
+    # Reset when pressing anything
+    0≡r.key.PressedKey⟨⟩?@;
+        center ↩ @ # Runtime because screen size changes midddle
+        screenSize ↩ @
+        frame ↩ 0
+        hillPosition ↩ 0‿0 # height ‿ rightMovement
+        speed ↩ 10
+        gravityAcceleration ↩ 10
+        gravitySpeed ↩ 0
+        timingHeadAngle ↩ 90
+        angle ↩ 0
+
+        obstacles ↩ (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
+        pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)⊸/hillVertices
+}
 
 {𝕊:
     Setup@
-    PerFrame•_While_(¬window.ShouldClose) 0
+    {𝕊:speed<5}◶PerFrame‿GameOver •_While_(¬window.ShouldClose) 0
     Teardown@
 } window._openAs "Hello!!!"
-
