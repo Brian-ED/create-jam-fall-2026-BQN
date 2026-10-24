@@ -41,7 +41,7 @@ PerFrame ← {𝕊:
       screenSize ↩ r.monitor.Size@
       center ↩ 2÷˜screenSize-radius
     }
-    hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed×r.key.IsDown r.key.right
+    hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed
     {CheckCollision hillPosition?
         gravityAcceleration ↩ 0
         gravitySpeed ↩ 0
