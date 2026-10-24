@@ -2,14 +2,11 @@
 # from color take out red, white and black
 ⟨⟨red, white, black⟩⇐color, window, draw⟩←r←•Import "../rayed-bqn/rayed.bqn"
 
-CheckCollisionRay2dCircle ← {direction𝕊center‿radius: c‿r←𝕩 # v2 𝕊 v2‿f
-  𝕨×⍟(0⊸≠)¨˜-0⌊(0⊸<◶¯∞‿√r×˜⊸-·+´∘×˜c-𝕨×⊢)⌾((0⌈+´𝕨×c)⊸+)0
-}
-
 radius ← 100
 hillDetail ← 100
 hillLineCount ← 100  # hillLineCount × hillDetail = hillLength
 angleRandomness ← 20
+distanceBetweenObstacles ← 40
 
 hillVertices ← {
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ hillLineCount •rand.Range angleRandomness
@@ -35,6 +32,8 @@ gravitySpeed ← 0
 
 CheckCollision ← {𝕊:∨´{r.raylib.CheckCollisionCircleLine ⟨center⋄radius⋄𝕨⋄𝕩⟩}˝⎉2  𝕩⊸+⎉1 lines}
 
+obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
+
 PerFrame ← {𝕊:
     {frame ≡ 0?
       screenSize ↩ r.monitor.Size@
@@ -57,7 +56,10 @@ PerFrame ← {𝕊:
     }
 
     r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
+
+    r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
+
 }draw._withCanvas⟜r.color.lightblue
 
 PerFrame•_While_(¬window.ShouldClose)window._openAs "Hello!!!"
