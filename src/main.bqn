@@ -31,6 +31,8 @@ frame ← 0
 hillPosition ← 0‿0 # height ‿ rightMovement
 speed ← 10
 
+CheckCollision ← {𝕊:∨´{r.raylib.CheckCollisionCircleLine ⟨center⋄radius⋄𝕨⋄𝕩⟩}˝⎉2  𝕩⊸+⎉1 lines}
+
 PerFrame ← {𝕊:
     {frame ≡ 0?
       screenSize ↩ r.monitor.Size@
@@ -38,10 +40,10 @@ PerFrame ← {𝕊:
     }
     hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed×r.key.IsDown r.key.right
 
-    # If not collides with mountain
-    {¬∨´{r.raylib.CheckCollisionCircleLine ⟨center⋄radius⋄𝕨⋄𝕩⟩}˝⎉2  hillPosition⊸+⎉1 lines?
+    {¬CheckCollision hillPosition?
         # Gravity
         hillPosition -⟜10⌾(1⊸⊑)↩
+        hillPosition +⟜1⌾(1⊸⊑)•_while_ CheckCollision ↩
     ;@}
 
     r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
