@@ -23,16 +23,20 @@ pre ← ("drum_sample/"∾∾⟜"_")¨ "ride"‿"tom"‿"snare"‿"kick"
 sample ← pre <⊸((wav.Read∾∾".wav"˙)¨)¨ 'a'+↕¨1+⌈´¨pat
 
 # Construct drum sequence
-pattern ← lvl {⥊ {¯1¨⌾(𝕨⊸/)𝕩}⟜𝕩˘ (↕8)<⌜0⌈𝕨}¨ pat
+pattern ← lvl {{¯1¨⌾(𝕨⊸/)𝕩}⟜𝕩˘ (↕8)<⌜0⌈𝕨}¨ pat
 
 # Assemble drums
 PinkDiff ← {𝕩 ↑ ⥊∘⍉∘≍´⌽ -⟜«∘(-⟜¬o.RandFloats)¨ (1⌈↕∘⌈)⌾(2⋆⁼⊢)2⌈𝕩}
-bl ← ⌊0.5+ beat × 1 + 100 ÷˜ PinkDiff ≠⊑pattern
-len ← (12×beat)+´bl
+n ← ≠⊑pat ⋄ len ← n×beat
+bl ← {⌊0.5+len×÷⟜(⊢´)𝕩}⌾(+`) beat × 1 + 100 ÷˜ PinkDiff n
+! len = +´bl
 Seq ← { m ← 0≤𝕩 ⋄ ∾≍ (+´¨ m+`⊸⊔bl) ↑⎉1¨ ⟨2‿0⥊0⟩∾𝕨⊏˜m/𝕩 }
-d ← (0⥊˜12×beat)⊸∾˘ 0.75 × +´ sample Seq¨ pattern
+d ← 0.75 × +´ sample Seq⎉1¨ pattern
 
-# Read guitars and mix
-g ←                               len ↑ ⊏wav.Read "guitar.wav"
-b ← {(0.75×𝕩)+8÷˜•math.Tanh 32×𝕩} len ↑ ⊏wav.Read "bass.wav"
-"mix.wav" wav.Write˜ d +⎉1 g + b
+# Read guitars
+off ← 12×beat
+g ←                               off ↓ ⊏wav.Read "guitar.wav"
+b ← {(0.75×𝕩)+8÷˜•math.Tanh 32×𝕩} off ↓ ⊏wav.Read "bass.wav"
+
+# Generate a segment: 𝕩 is density, 0 to 7
+{ (𝕩⊏d) +⎉1 g +○(len↑(𝕩×len)↓⊢) b }
