@@ -2,13 +2,7 @@
 # from color take out red, white and black
 ⟨⟨red, white, black⟩⇐color, window, draw⟩←r←•Import "../rayed-bqn/rayed.bqn"
 
-radius ← 100
-hillDetail ← 100
-hillLineCount ← 100  # hillLineCount × hillDetail = hillLength
-angleRandomness ← 20
-distanceBetweenObstacles ← 40
-
-hillVertices ← {
+GetHillVertices ← {𝕊:
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ hillLineCount •rand.Range angleRandomness
     followAngles ← ¯45(¯75⌈¯35⌊+)`randomAngles
     asMats ← r.math.MatrixRotate2D¨ r.math.deg2rad× followAngles
@@ -16,6 +10,14 @@ hillVertices ← {
     0‿0∾0‿0+`>linesAtAnglesFormHill
 }
 
+
+radius ← 100
+hillDetail ← 100
+hillLineCount ← 200  # hillLineCount × hillDetail = hillLength
+angleRandomness ← 20
+distanceBetweenObstacles ← 40
+
+hillVertices←GetHillVertices@
 lines ← 2↕hillVertices
 
 hillBottomLeft ← (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
@@ -53,6 +55,15 @@ PerFrame ← {𝕊:
             gravitySpeed ↩ 0
             hillPosition (+⟜1⌾(1⊸⊑)•_while_ CheckCollision) ↩
         ;@}
+    }
+
+    # generate future hill
+    {¬ (-1⊑hillPosition)>1⊑(⌊2÷˜≠)⊸⊏hillVertices? @;
+        hillVertices↩((⌊2÷˜≠)⊸↓hillVertices)∾(•Show ⊢˝hillVertices)⊸+˘ (⌊2÷˜≠)⊸↑GetHillVertices@
+        lines ↩ 2↕hillVertices
+
+        hillBottomLeft ↩ (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
+        hillAsTriangles ↩ ∾⟜hillBottomLeft⎉2 lines
     }
 
     r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
