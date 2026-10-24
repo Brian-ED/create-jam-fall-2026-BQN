@@ -75,7 +75,7 @@ LoadAll ← { 𝕊@:
 UnloadAll ← { 𝕊a :
        r.font.Unload a.font
        r.texture.Unload a.speedometer_texture
-       r.texture.Unload a.sneedle_texture
+       r.texture.Unload a.needle_texture
        r.texture.Unload a.boulder_texture
 }
 
