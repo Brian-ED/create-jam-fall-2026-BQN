@@ -35,8 +35,8 @@ d ← 0.75 × +´ sample Seq⎉1¨ pattern
 
 # Read guitars
 off ← 12×beat
-g ←                               off ↓ ⊏wav.Read "guitar.wav"
-b ← {(0.75×𝕩)+8÷˜•math.Tanh 32×𝕩} off ↓ ⊏wav.Read "bass.wav"
+g ←                                          off ↓ ⊏wav.Read "guitar.wav"
+b ← {(0.75×𝕩)+8÷˜•math.Tanh 32×𝕩}⌾(÷⟜(2⋆15)) off ↓ ⊏wav.Read "bass.wav"
 
 # Generate a segment: 𝕩 is density, 0 to 7
 { (𝕩⊏d) +⎉1 g +○(len↑(𝕩×len)↓⊢) b }
