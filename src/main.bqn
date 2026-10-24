@@ -30,6 +30,8 @@ screenSize ← @
 frame ← 0
 hillPosition ← 0‿0 # height ‿ rightMovement
 speed ← 10
+gravityAcceleration ← 10
+gravitySpeed ← 0
 
 CheckCollision ← {𝕊:∨´{r.raylib.CheckCollisionCircleLine ⟨center⋄radius⋄𝕨⋄𝕩⟩}˝⎉2  𝕩⊸+⎉1 lines}
 
@@ -39,12 +41,20 @@ PerFrame ← {𝕊:
       center ↩ 2÷˜screenSize-radius
     }
     hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed×r.key.IsDown r.key.right
-
-    {¬CheckCollision hillPosition?
+    {CheckCollision hillPosition?
+        gravityAcceleration ↩ 0
+        gravitySpeed ↩ 0
+    ;
         # Gravity
-        hillPosition -⟜10⌾(1⊸⊑)↩
-        hillPosition +⟜1⌾(1⊸⊑)•_while_ CheckCollision ↩
-    ;@}
+        gravityAcceleration +↩ 0.02
+        gravitySpeed +↩ 0.6×gravityAcceleration
+        hillPosition -⟜gravitySpeed⌾(1⊸⊑)↩
+        {CheckCollision hillPosition?
+            gravityAcceleration ↩ 0
+            gravitySpeed ↩ 0
+            hillPosition (+⟜1⌾(1⊸⊑)•_while_ CheckCollision) ↩
+        ;@}
+    }
 
     r.raylib.DrawCircleV ⟨ center ⋄ radius ⋄ red⟩
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
