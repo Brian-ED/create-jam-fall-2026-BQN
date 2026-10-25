@@ -1,9 +1,9 @@
-r←•Import "../rayed-bqn/rayed.bqn"
+⟨sound⟩ ←r←•Import "../rayed-bqn/rayed.bqn"
 
 ⟨Button⟩ ⇐
 
 Button ← {
-    pos‿size‿title‿font‿fontSize‿col ⇐ 𝕩
+    pos‿size‿title‿font‿fontSize‿col‿sound ⇐ 𝕩
     {
         # Error handling
         "Position must have 2 argument"!2¬≠pos,
@@ -11,10 +11,12 @@ Button ← {
     }
 
     isHovered ⇐ 0
+    isClicked ⇐ 0
 
     Draw ⇐ {𝕊:
         # Draw rectangle with text 
         color ← { isHovered ? ⌊(col × 0.8‿0.8‿0.8‿1) ; col}
+        color ↩ { isClicked ? ⌊(color × 0.9‿0.9‿0.9‿1) ; color}
 
         spacing ← 0
 
@@ -25,9 +27,11 @@ Button ← {
         color r.draw.Rectangle +`pos≍size
         r.color.black‿font‿fontSize r.draw.Text textX ‿textY ⋈title 
     }
-    Update ⇐ {𝕊: {
-            r.raylib.CheckCollisionPointRec ⟨ r.mouse.GetPos@ ⋄ pos∾size ⟩  ? isHovered ↩ 1 ; isHovered ↩ 0
-        }  
+    Update ⇐ {𝕊: 
+        {r.raylib.CheckCollisionPointRec ⟨ r.mouse.GetPos@ ⋄ pos∾size ⟩  ? isHovered ↩ 1 ; isHovered ↩ 0}
+        {r.raylib.IsMouseButtonPressed r.raylib.mouseButton.mOUSE_BUTTON_LEFT ∧ isHovered ? 
+        isClicked ↩ 1; isClicked ↩ 0}
+        
 
     }
 
