@@ -2,8 +2,8 @@
 # from color take out red, white and black
 ⟨⟨red, white, black⟩⇐color, window, draw⟩←r←•Import "../rayed-bqn/rayed.bqn"
 
-#•Import⍟(¬•file.Exists∘"../sound/mix.wav") "../sound/mix.bqn"
-#soundMixFile ← •file.Realpath "../sound/mix.wav"
+music ← •Import "../sound/mix.bqn"
+musicStream ← @
 
 GetHillVertices ← {𝕊:
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ hillLineCount •rand.Range angleRandomness
@@ -43,10 +43,6 @@ angle ← 0
 obstacles ← (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
 pickups ← (0=(20⥊1)»distanceBetweenPickups|↕∘≠)⊸/hillVertices
 
-# Stores mix.wav
-soundMixWav ← @
-soundMix ← @
-
 # speedometer&Co.
 # putting everything in the toplevel so my asset loading style and
 # yours don't clash
@@ -55,7 +51,7 @@ needle_texture ← @
 speedometer_texture ← @
 boulder_texture ← @
 dirt_texture ← @
-    
+
 
 # scale at which to draw the boulder and speedometer textures
 # initialized empty since computing them depends on the textures
@@ -94,8 +90,7 @@ UnloadAssets ← { 𝕊@:
        r.texture.Unload needle_texture
        r.texture.Unload boulder_texture
        r.texture.Unload dirt_texture
-       #r.raylib.UnloadWave soundMixWav
-       #r.raylib.UnloadSound soundMix
+       r.raylib.UnloadAudioStream musicStream
        r.raylib.CloseAudioDevice⟨⟩
 }
 
@@ -160,7 +155,6 @@ DrawBoulder ← { x‿y𝕊angle : 10
     x‿y‿angle‿boulder_scale DrawTextureCentered boulder_texture
 }
 
-r.raylib.SetTraceLogLevel r.raylib.traceLogLevel.log_all
 PerFrame ← {𝕊:
     # First frame does setup
     {frame ≡ 0?
@@ -169,12 +163,15 @@ PerFrame ← {𝕊:
         center ↩ 2÷˜screenSize-radius
         font↩r.font.LoadBQN@
         r.raylib.InitAudioDevice⟨⟩
-        #soundMixWav ↩ r.raylib.LoadWave soundMixFile
-        #soundMix ↩ r.raylib.LoadSoundFromWave soundMixWav
-        #r.raylib.PlaySound soundMix
+        r.raylib.SetAudioStreamBufferSizeDefault music.len # ≠⊏musicGen
+        musicStream↩r.raylib.LoadAudioStream⟨48000, 32, 2⟩
+        r.raylib.SetAudioStreamPan musicStream‿0
+        r.raylib.PlayAudioStream musicStream
+    ;@
+        r.raylib.IsAudioStreamProcessed musicStream?
+            musicGen ← music.Gen •rand.Range 7
+            r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
     ;@}
-    #textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ •Repr speed ⋄ 20 ⋄ 0 ⟩
-    #⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨(textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄•Repr speed⟩
 
     # Hill moves backwards for forward movement
     hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed
