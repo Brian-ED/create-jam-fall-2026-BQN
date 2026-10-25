@@ -36,11 +36,11 @@ d ← 0.75 × +´ sample Seq⎉1¨ pattern
 # Read guitars
 rot ← ¯2e3  # rotate to avoid guitar.wav popping
 off ← rot + 12×beat
-Tanh8 ← •math.Tanh⌾(÷⟜(8×2⋆15))
+Tanh6 ← •math.Tanh⌾((6÷2⋆15)⊸×)
 Pan ← 2⊸(⊢⋈-)⊸(×⌜)
 g ← 1.07 Pan             off ↓ ⊏wav.Read "guitar.wav"
-b ← {(0.75×𝕩)+Tanh8 4×𝕩} off ↓ ⊏wav.Read "bass.wav"
-r ← 0.88 Pan 2 × Tanh8   off ↓ ⊏wav.Read "rhythm.wav"
+b ← {(0.75×𝕩)+Tanh6 4×𝕩} off ↓ ⊏wav.Read "bass.wav"
+r ← 0.88 Pan 2 × Tanh6   off ↓ ⊏wav.Read "rhythm.wav"
 
 Sl ← len⊸×⊸{o‿l𝕊𝕩: (l↑o↓⊢)⎉1𝕩; o𝕊𝕩:o‿len𝕊𝕩}
 # Generate a segment: 𝕩 is density, 0 to 7
