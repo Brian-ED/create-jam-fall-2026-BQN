@@ -61,7 +61,7 @@ boulder_scale ← @
 speedometer_scale ← @
 
 
-# a texture id‿width‿height‿mipmaps‿format 
+# a texture id‿width‿height‿mipmaps‿format
 # to isolate width‿height we do
 TexSize ← {2↑1↓𝕩}
 
@@ -85,13 +85,13 @@ LoadAssets ← { 𝕊@:
 # unload all loaded assets
 # this is our teardown function
 UnloadAssets ← { 𝕊@:
-       r.font.Unload font
-       r.texture.Unload speedometer_texture
-       r.texture.Unload needle_texture
-       r.texture.Unload boulder_texture
-       r.texture.Unload dirt_texture
-       r.raylib.UnloadAudioStream musicStream
-       r.raylib.CloseAudioDevice⟨⟩
+    r.font.Unload font
+    r.texture.Unload speedometer_texture
+    r.texture.Unload needle_texture
+    r.texture.Unload boulder_texture
+    r.texture.Unload dirt_texture
+    r.raylib.UnloadAudioStream musicStream
+    r.raylib.CloseAudioDevice⟨⟩
 }
 
 Setup ← { 𝕊@:
@@ -129,7 +129,7 @@ Spin ← { w‿h𝕊a :
      ar ← π × a ÷ 180 # raylib angles are degrees, •math.Sin and •math.Cos want radians
      as‿ac ← ⟨•math.Sin ar, •math.Cos ar⟩
      dx ← (ac×w÷2) - (as×h÷2)
-     dy ← (ac×h÷2) + (as×w÷2)  
+     dy ← (ac×h÷2) + (as×w÷2)
      dx‿dy
 }
 
@@ -146,7 +146,7 @@ DrawSpeedometer ← { x‿y 𝕊 speed :
     # 100 is 0 degrees
     # and plus the needle texture is already at 90 degrees
     needle_angle ← 90 + 180 × 100 ÷˜ speed - 100
-    
+
     x‿y‿0‿speedometer_scale DrawTextureCentered speedometer_texture
     x‿y‿needle_angle‿speedometer_scale DrawTextureCentered needle_texture
 }
