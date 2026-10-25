@@ -13,3 +13,23 @@ To run the game, run:
 ```
 bqn src/main.bqn
 ```
+
+# Rick the Rocked Rolling Rock
+Controls:
+- Press any
+  keyboard button
+  at the right
+  time to get a speed boost.
+  Don't let the walls slow
+  you down!
+- Also, to restart,
+  wait for game over
+  and press
+  any keyboard
+  button.
+
+The game is underdeveloped and unfinished, but you can roll and hit walls and die if you slow down from walls too much.
+
+Speed up by pressing a keyboard key while the white line is on the red triangle.
+
+The accumulated trash on the boulder does nothing.
