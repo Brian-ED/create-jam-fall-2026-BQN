@@ -44,6 +44,6 @@ r ← 0.88 Pan 2 × Tanh8   off ↓ ⊏wav.Read "rhythm.wav"
 
 Sl ← len⊸×⊸{o‿l𝕊𝕩: (l↑o↓⊢)⎉1𝕩; o𝕊𝕩:o‿len𝕊𝕩}
 # Generate a segment: 𝕩 is density, 0 to 7
-Gen ⇐ { +⎉1´ ⟨rot⌽⎉1𝕩⊏d⟩∾ (𝕨⊢⊘×⊢)⌾(¯1⊸⊑) 𝕩⊸Sl⎉1¨ g‿b‿r }
+Gen ⇐ { +⎉1´ ⟨rot⌽⎉1𝕩⊏d⟩∾ (𝕨⊣0.5)⊸×⌾(¯1⊸⊑) 𝕩⊸Sl⎉1¨ g‿b‿r }
 # Ending segment: constant but double length
 End ⇐ {𝕊: (⥊˘1⍉2↑d) + (1 Sl g) ∾⟜(0¨)⊸+⎉1 4‿2 Sl b }
