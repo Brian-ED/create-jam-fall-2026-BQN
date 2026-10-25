@@ -3,7 +3,7 @@
 ⟨Button⟩ ⇐
 
 Button ← {
-    pos‿size‿title‿font‿fontSize‿col‿sound ⇐ 𝕩
+    pos‿size‿title‿font‿fontSize‿col‿snd ⇐ 𝕩
     {
         # Error handling
         "Position must have 2 argument"!2¬≠pos,
@@ -29,9 +29,8 @@ Button ← {
     }
     Update ⇐ {𝕊: 
         {r.raylib.CheckCollisionPointRec ⟨ r.mouse.GetPos@ ⋄ pos∾size ⟩  ? isHovered ↩ 1 ; isHovered ↩ 0}
-        {r.raylib.IsMouseButtonPressed r.raylib.mouseButton.mOUSE_BUTTON_LEFT ∧ isHovered ? 
-        isClicked ↩ 1; isClicked ↩ 0}
-        
+        {(r.raylib.IsMouseButtonPressed r.raylib.mouseButton.mOUSE_BUTTON_LEFT) ∧ isHovered ? 
+        isClicked ↩ 1 ⋄ sound.Play snd; isClicked ↩ 0}
 
     }
 
