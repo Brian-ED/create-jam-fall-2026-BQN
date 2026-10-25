@@ -256,7 +256,12 @@ PerFrame ← {𝕊:
 
     # Drawing hill and obstacles
     r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
+
+    r.raylib.SetShapesTexture ⟨dirt_texture ⋄ 0‿0∾2‿1⊏dirt_texture⟩
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
+    # r.raylib.DrawTriangleFan ⟨r.color.white⟩∾˜⋈⟜≠ <˘ ∨˘⌾⍉ ⌈ hillBottomLeft∾1↓hillVertices
+    r.raylib.SetShapesTexture ⟨5⥊0 ⋄ 0‿0‿1‿1⟩ 
+
     r.color.black‿5⊸r.draw.Line pickupLines
 
     angle+↩2
