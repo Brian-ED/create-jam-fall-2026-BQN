@@ -26,9 +26,10 @@ sample ← pre <⊸((wav.Read∾∾".wav"˙)¨)¨ 'a'+↕¨1+⌈´¨pat
 pattern ← lvl {{¯1¨⌾(𝕨⊸/)𝕩}⟜𝕩˘ (↕8)<⌜0⌈𝕨}¨ pat
 
 # Assemble drums
-PinkDiff ← {𝕩 ↑ ⥊∘⍉∘≍´⌽ -⟜«∘(-⟜¬o.RandFloats)¨ (1⌈↕∘⌈)⌾(2⋆⁼⊢)2⌈𝕩}
 n ← ≠⊑pat ⋄ len ⇐ n×beat
-bl ← {⌊0.5+len×÷⟜(⊢´)𝕩}⌾(+`) beat × 1 + 100 ÷˜ PinkDiff n
+PinkDiff ← {𝕩 ↑ ⥊∘⍉∘≍´⌽ -⟜«∘(-⟜¬o.RandFloats)¨ (1⌈↕∘⌈)⌾(2⋆⁼⊢)2⌈𝕩}
+beatmod ← (80 ÷˜ PinkDiff n) + n ⥊ ∾⟜(-+´) 1‿2 ÷ 48
+bl ← {⌊0.5+len×÷⟜(⊢´)𝕩}⌾(+`) beat × 1 + beatmod
 ! len = +´bl
 Seq ← { m ← 0≤𝕩 ⋄ ∾≍ (+´¨ m+`⊸⊔bl) ↑⎉1¨ ⟨2‿0⥊0⟩∾𝕨⊏˜m/𝕩 }
 d ← 0.75 × +´ sample Seq⎉1¨ pattern
