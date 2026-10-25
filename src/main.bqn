@@ -294,10 +294,9 @@ GameOver ← {𝕊0:
     
         # Reset when pressing anything
         0≡r.key.PressedKey⟨⟩?𝕩+1;
+            frame ↩ 1 # Can't set frame to 0 or you re-load every asset
             hillPosition ↩ 0⋈⊑screenSize # height ‿ rightMovement
             hillPosition (-⟜1⌾(1⊸⊑)•_while_ (¬CheckCollision)) ↩
-            frame ↩ 1 # Can't set frame to 0 or you re-load every asset
-            hillPosition ↩ 0‿0 # height ‿ rightMovement
             speed ↩ 10
             gravityAcceleration ↩ 10
             gravitySpeed ↩ 0
