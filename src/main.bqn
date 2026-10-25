@@ -15,6 +15,10 @@ GetHillVertices ← {𝕊:
 
 CheckCollision ← {𝕊:∨´{r.raylib.CheckCollisionCircleLine ⟨center⋄radius⋄𝕨⋄𝕩⟩}˝⎉2  𝕩⊸+⎉1 lines}
 
+CheckCollisionRay2dCircle ← {direction𝕊center‿radius: c‿r←𝕩 # v2 𝕊 v2‿f
+  𝕨×⍟(0⊸≠)¨˜-0⌊(0⊸<◶¯∞‿√r×˜⊸-·+´∘×˜c-𝕨×⊢)⌾((0⌈+´𝕨×c)⊸+)0
+}
+
 radius ← 100
 hillDetail ← 100
 hillLineCount ← 200  # hillLineCount × hillDetail = hillLength
@@ -28,6 +32,8 @@ lines ← 2↕hillVertices
 hillBottomLeft ← (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
 hillAsTriangles ← ∾⟜hillBottomLeft⎉2 lines
 
+pickupsHeight ← 10
+
 # Runtime variables
 nextObstacleIndex←0
 center ← @ # Runtime because screen size changes midddle
@@ -37,8 +43,9 @@ hillPosition ← 0‿0 # height ‿ rightMovement
 speed ← 10
 gravityAcceleration ← 0
 gravitySpeed ← 0
-timingHeadAngle ← 90
 angle ← 0
+carrying ← ⟨⟩
+sector ← 80‿100
 
 obstacles ← (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
 pickups ← (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
@@ -173,6 +180,9 @@ PerFrame ← {𝕊:
             r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
     ;@}
 
+    # Pickups are drawn as a flat line
+    pickupLines←(0‿pickupsHeight-˜hillPosition)⊸+⎉1 ⌊‿2‿2⥊hillVertices/˜»⊸∨pickups
+
     # Hill moves backwards for forward movement
     hillPosition {-⟜𝕨⌾⊑𝕩}˜↩ speed
 
@@ -195,7 +205,16 @@ PerFrame ← {𝕊:
     {(radius+⊑center-hillPosition) > ⊑nextObstacleIndex⊏obstacles ?
         speed -↩ •rand.Range 10
         nextObstacleIndex((≠obstacles)|+)↩1
+        obstacles↓˜↩1
     ;@}
+
+    # Hit pickups
+    { ∨´ <∘r.raylib.CheckCollisionPointCircle˘(center‿radius∾˜<)˘𝕩?
+        carrying ∾↩ <𝕩‿angle
+        pickupLines↓˜↩1
+        pickups{0‿0⌾((0‿1+1⊐˜𝕩)⊸⊏)𝕩}↩
+        @
+    ;@}∘∧⎉2 pickupLines
 
     # generate future hill
     {¬ (-1⊑hillPosition)>1⊑(⌊2÷˜≠)⊸⊏hillVertices? @;
@@ -209,56 +228,75 @@ PerFrame ← {𝕊:
         pickups ↩ (0=distanceBetweenObstacles|5+↕∘≠)hillVertices
     }
 
+    # If you hit timing, you get a boost in speed
+#    {angle?
+#
+#
+#    }
+
     # Drawing boulder character
     center DrawBoulder angle
-    # TODO: is this ok? should we sync this with timingHeadAngle?
-    angle ↩ 360 | speed + angle
+    angle (360 | (π÷˜speed) + ⊢)↩
 
+    # Draw carrying
+    r.color.black‿5⊸r.draw.Line¨ {r.math.MP⟜(r.math.MatrixRotate2D r.math.deg2Rad × -𝕩-˜angle)⌾(-⟜center)˘𝕨}´¨carrying
 
     # Drawing speedometer
     (10×speed) DrawSpeedometer˜ ⌊∘(÷⟜3)⌾(1⊸⊑)center
 
     # Drawing black sector for timing window
-    r.raylib.DrawCircleSector ⟨center⋄radius×0.8⋄80⋄100⋄1⋄r.color.black⟩
-    r.raylib.DrawCircleSector ⟨center⋄radius×0.7⋄80⋄100⋄1⋄r.color.red⟩
+    r.raylib.DrawCircleSector ⟨center⋄radius×0.8⟩∾sector∾⟨1⋄r.color.black⟩
+    r.raylib.DrawCircleSector ⟨center⋄radius×0.7⟩∾sector∾⟨1⋄r.color.red⟩
 
     # Drawing white clock hand for when to hit timing window
     scale ← 0.1
-    ⟨4⥊255, 5⟩ r.draw.Line ≍⟜(+⟜(timingHeadAngle Spin˜ ∾˜radius)) center
+    ⟨4⥊255, 5⟩ r.draw.Line ≍⟜(+⟜(angle Spin˜ ∾˜radius)) center
 
     # Drawing hill and obstacles
     r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
-    r.color.black‿5⊸r.draw.Line hillPosition⊸+⎉1 ⌊‿2‿2⥊hillVertices/˜»⊸∨pickups
+    r.color.black‿5⊸r.draw.Line pickupLines
 
-    timingHeadAngle+↩2
+    angle+↩2
     frame+↩1
+    𝕩
 }draw._withCanvas⟜r.color.lightblue
 
-GameOver ← {𝕊:
+GameOver ← {𝕊0:
+    r.raylib.SetAudioStreamBufferSizeDefault 2×music.len
+    musicGen ← music.End@ # Generate end music
+    r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
+    1+𝕩
+;
+    •Show 𝕩
     {𝕊:
         loseTitle ← "Game Over"‿"You're too slow to go on"
         {𝕊:
             textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ 𝕨 ⋄ 20 ⋄ 0 ⟩
             ⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨ 0‿(40×𝕩)+ (textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄𝕨⟩
         }¨⟜(↕≠) loseTitle
-        r.raylib.EndDrawing⟨⟩
+
+        r.raylib.IsAudioStreamProcessed musicStream?
+            musicGen ← music.End@ # Generate end music
+            r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
+        ;@
+
+    
+        # Reset when pressing anything
+        0≡r.key.PressedKey⟨⟩?@;
+            center ↩ @ # Runtime because screen size changes midddle
+            screenSize ↩ @
+            frame ↩ 1 # Can't set frame to 0 or you re-load every asset
+            hillPosition ↩ 0‿0 # height ‿ rightMovement
+            speed ↩ 10
+            gravityAcceleration ↩ 10
+            gravitySpeed ↩ 0
+            angle ↩ 90
+
+            obstacles ↩ (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
+            pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
     }draw._withCanvas r.color.lightblue
-
-    # Reset when pressing anything
-    0≡r.key.PressedKey⟨⟩?@;
-        center ↩ @ # Runtime because screen size changes midddle
-        screenSize ↩ @
-        frame ↩ 0
-        hillPosition ↩ 0‿0 # height ‿ rightMovement
-        speed ↩ 10
-        gravityAcceleration ↩ 10
-        gravitySpeed ↩ 0
-        timingHeadAngle ↩ 90
-        angle ↩ 0
-
-        obstacles ↩ (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
-        pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
+    1+𝕩
 }
 
 {𝕊:
