@@ -270,12 +270,16 @@ PerFrame ← {𝕊:
 }draw._withCanvas⟜r.color.lightblue
 
 GameOver ← {𝕊0:
-    r.raylib.SetAudioStreamBufferSizeDefault 2×music.len
-    musicGen ← music.End@ # Generate end music
-    r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
-    1+𝕩
-;
-    {𝕊:
+        r.raylib.UnloadAudioStream musicStream
+        r.raylib.SetAudioStreamBufferSizeDefault 2×music.len
+        musicStream↩r.raylib.LoadAudioStream⟨48000, 32, 2⟩
+
+        musicGen ← music.End@ # Generate end music
+        r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
+        r.raylib.PlayAudioStream musicStream
+        1+𝕩
+    ;
+
         loseTitle ← "Game Over"‿"You're too slow to go on"
         {𝕊:
             textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ 𝕨 ⋄ 20 ⋄ 0 ⟩
@@ -289,7 +293,7 @@ GameOver ← {𝕊0:
 
     
         # Reset when pressing anything
-        0≡r.key.PressedKey⟨⟩?@;
+        0≡r.key.PressedKey⟨⟩?𝕩+1;
             hillPosition ↩ 0⋈⊑screenSize # height ‿ rightMovement
             hillPosition (-⟜1⌾(1⊸⊑)•_while_ (¬CheckCollision)) ↩
             frame ↩ 1 # Can't set frame to 0 or you re-load every asset
@@ -301,9 +305,8 @@ GameOver ← {𝕊0:
 
             obstacles ↩ (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
             pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
-    }draw._withCanvas r.color.lightblue
-    1+𝕩
-}
+            𝕩+1
+}draw._withCanvas⟜r.color.lightblue
 
 {𝕊:
     Setup@
