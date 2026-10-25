@@ -236,13 +236,13 @@ PerFrame ← {𝕊:
 
 GameOver ← {𝕊:
     {𝕊:
-        loseTitle ← "You Lose"‿"You're too slow to go on"
+        loseTitle ← "Game Over"‿"You're too slow to go on"
         {𝕊:
             textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ 𝕨 ⋄ 20 ⋄ 0 ⟩
             ⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨ 0‿(40×𝕩)+ (textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄𝕨⟩
         }¨⟜(↕≠) loseTitle
         r.raylib.EndDrawing⟨⟩
-    }draw._withCanvas r.color.red
+    }draw._withCanvas r.color.lightblue
 
     # Reset when pressing anything
     0≡r.key.PressedKey⟨⟩?@;
