@@ -168,6 +168,8 @@ PerFrame ← {𝕊:
         r.raylib.SetTraceLogLevel r.raylib.traceLogLevel.log_all
         screenSize ↩ r.monitor.Size@
         center ↩ 2÷˜screenSize-radius
+        hillPosition ↩ 0⋈⊑screenSize # height ‿ rightMovement
+        hillPosition (-⟜1⌾(1⊸⊑)•_while_ (¬CheckCollision)) ↩
         font↩r.font.LoadBQN@
         r.raylib.InitAudioDevice⟨⟩
         r.raylib.SetAudioStreamBufferSizeDefault music.len # ≠⊏musicGen
@@ -268,7 +270,6 @@ GameOver ← {𝕊0:
     r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
     1+𝕩
 ;
-    •Show 𝕩
     {𝕊:
         loseTitle ← "Game Over"‿"You're too slow to go on"
         {𝕊:
@@ -276,16 +277,16 @@ GameOver ← {𝕊0:
             ⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨ 0‿(40×𝕩)+ (textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄𝕨⟩
         }¨⟜(↕≠) loseTitle
 
-        r.raylib.IsAudioStreamProcessed musicStream?
+        {r.raylib.IsAudioStreamProcessed musicStream?
             musicGen ← music.End@ # Generate end music
             r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
-        ;@
+        ;@}
 
     
         # Reset when pressing anything
         0≡r.key.PressedKey⟨⟩?@;
-            center ↩ @ # Runtime because screen size changes midddle
-            screenSize ↩ @
+            hillPosition ↩ 0⋈⊑screenSize # height ‿ rightMovement
+            hillPosition (-⟜1⌾(1⊸⊑)•_while_ (¬CheckCollision)) ↩
             frame ↩ 1 # Can't set frame to 0 or you re-load every asset
             hillPosition ↩ 0‿0 # height ‿ rightMovement
             speed ↩ 10
