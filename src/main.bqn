@@ -7,7 +7,7 @@ musicStream ← @
 
 GetHillVertices ← {𝕊:
     randomAngles ← (⌊÷⟜2 angleRandomness) -˜ hillLineCount •rand.Range angleRandomness
-    followAngles ← ¯45(¯75⌈¯35⌊+)`randomAngles
+    followAngles ← ¯45(¯80⌈¯60⌊+)`randomAngles
     asMats ← r.math.MatrixRotate2D¨ r.math.deg2rad× followAngles
     linesAtAnglesFormHill ← r.math.MP⟜0‿hillDetail¨ asMats
     0‿0∾0‿0+`>linesAtAnglesFormHill
@@ -41,7 +41,7 @@ timingHeadAngle ← 90
 angle ← 0
 
 obstacles ← (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
-pickups ← (0=(20⥊1)»distanceBetweenPickups|↕∘≠)⊸/hillVertices
+pickups ← (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
 
 # speedometer&Co.
 # putting everything in the toplevel so my asset loading style and
@@ -205,8 +205,8 @@ PerFrame ← {𝕊:
         hillBottomLeft ↩ (⌊´)⊸∾⟜(⌈´)˝⍉hillVertices
         hillAsTriangles ↩ ∾⟜hillBottomLeft⎉2 lines
 
-        obstacles ← (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
-        pickups ← (0=distanceBetweenObstacles|5+↕∘≠)⊸/hillVertices
+        obstacles ↩ (0=distanceBetweenObstacles|↕∘≠)⊸/hillVertices
+        pickups ↩ (0=distanceBetweenObstacles|5+↕∘≠)hillVertices
     }
 
     # Drawing boulder character
@@ -229,6 +229,7 @@ PerFrame ← {𝕊:
     # Drawing hill and obstacles
     r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
+    r.color.black‿5⊸r.draw.Line hillPosition⊸+⎉1 ⌊‿2‿2⥊hillVertices/˜»⊸∨pickups
 
     timingHeadAngle+↩2
     frame+↩1
@@ -257,7 +258,7 @@ GameOver ← {𝕊:
         angle ↩ 0
 
         obstacles ↩ (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
-        pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)⊸/hillVertices
+        pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
 }
 
 {𝕊:
