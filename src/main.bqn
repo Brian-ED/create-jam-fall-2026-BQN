@@ -173,6 +173,8 @@ PerFrame ← {𝕊:
         r.raylib.SetTraceLogLevel r.raylib.traceLogLevel.log_all
         screenSize ↩ r.monitor.Size@
         center ↩ 2÷˜screenSize-radius
+        hillPosition ↩ 0⋈⊑screenSize # height ‿ rightMovement
+        hillPosition (-⟜1⌾(1⊸⊑)•_while_ (¬CheckCollision)) ↩
         font↩r.font.LoadBQN@
         r.raylib.InitAudioDevice⟨⟩
         r.raylib.SetAudioStreamBufferSizeDefault music.len # ≠⊏musicGen
@@ -259,7 +261,12 @@ PerFrame ← {𝕊:
 
     # Drawing hill and obstacles
     r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
+
+    r.raylib.SetShapesTexture ⟨dirt_texture ⋄ 0‿0∾2‿1⊏dirt_texture⟩
     r.color.green⊸r.draw.Triangle hillPosition⊸+⎉1 hillAsTriangles
+    # r.raylib.DrawTriangleFan ⟨r.color.white⟩∾˜⋈⟜≠ <˘ ∨˘⌾⍉ ⌈ hillBottomLeft∾1↓hillVertices
+    r.raylib.SetShapesTexture ⟨5⥊0 ⋄ 0‿0‿1‿1⟩ 
+
     r.color.black‿5⊸r.draw.Line pickupLines
 
     angle+↩2
@@ -268,31 +275,33 @@ PerFrame ← {𝕊:
 }draw._withCanvas⟜r.color.lightblue
 
 GameOver ← {𝕊0:
-    r.raylib.SetAudioStreamBufferSizeDefault 2×music.len
-    musicGen ← music.End@ # Generate end music
-    r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
-    1+𝕩
-;
-    •Show 𝕩
-    {𝕊:
+        r.raylib.UnloadAudioStream musicStream
+        r.raylib.SetAudioStreamBufferSizeDefault 2×music.len
+        musicStream↩r.raylib.LoadAudioStream⟨48000, 32, 2⟩
+
+        musicGen ← music.End@ # Generate end music
+        r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
+        r.raylib.PlayAudioStream musicStream
+        1+𝕩
+    ;
+
         loseTitle ← "Game Over"‿"You're too slow to go on"
         {𝕊:
             textWidth ← ⊑r.raylib.MeasureTextEx ⟨ font ⋄ 𝕨 ⋄ 20 ⋄ 0 ⟩
             ⟨r.color.black⋄font⋄20⟩ r.draw.Text ⟨ 0‿(40×𝕩)+ (textWidth‿0÷2)-˜0‿30-˜0‿radius-˜center⋄𝕨⟩
         }¨⟜(↕≠) loseTitle
 
-        r.raylib.IsAudioStreamProcessed musicStream?
+        {r.raylib.IsAudioStreamProcessed musicStream?
             musicGen ← music.End@ # Generate end music
             r.raylib.UpdateAudioStreamRaw ⟨musicStream, r.low.F32ToI8 (2⋆15)÷˜⥊⍉musicGen , ≠⍉musicGen⟩
-        ;@
+        ;@}
 
     
         # Reset when pressing anything
-        0≡r.key.PressedKey⟨⟩?@;
-            center ↩ @ # Runtime because screen size changes midddle
-            screenSize ↩ @
+        0≡r.key.PressedKey⟨⟩?𝕩+1;
             frame ↩ 1 # Can't set frame to 0 or you re-load every asset
-            hillPosition ↩ 0‿0 # height ‿ rightMovement
+            hillPosition ↩ 0⋈⊑screenSize # height ‿ rightMovement
+            hillPosition (-⟜1⌾(1⊸⊑)•_while_ (¬CheckCollision)) ↩
             speed ↩ 10
             gravityAcceleration ↩ 10
             gravitySpeed ↩ 0
@@ -300,9 +309,8 @@ GameOver ← {𝕊0:
 
             obstacles ↩ (0=(50⥊1)»distanceBetweenObstacles|20+↕∘≠)⊸/hillVertices
             pickups ↩ (0=(20⥊1)»distanceBetweenPickups|↕∘≠)hillVertices
-    }draw._withCanvas r.color.lightblue
-    1+𝕩
-}
+            𝕩+1
+}draw._withCanvas⟜r.color.lightblue
 
 {𝕊:
     Setup@
