@@ -42,5 +42,8 @@ g ← 1.07 Pan             off ↓ ⊏wav.Read "guitar.wav"
 b ← {(0.75×𝕩)+Tanh8 4×𝕩} off ↓ ⊏wav.Read "bass.wav"
 r ← 0.88 Pan Tanh8       off ↓ ⊏wav.Read "rhythm.wav"
 
+Sl ← len⊸×⊸{o‿l𝕊𝕩: (l↑o↓⊢)⎉1𝕩; o𝕊𝕩:o‿len𝕊𝕩}
 # Generate a segment: 𝕩 is density, 0 to 7
-Gen ⇐ { +⎉1´ ⟨rot⌽⎉1𝕩⊏d⟩∾ (len↑(𝕩×len)↓⊢)⎉1¨ g‿b‿r }
+Gen ⇐ { +⎉1´ ⟨rot⌽⎉1𝕩⊏d⟩∾ 𝕩⊸Sl⎉1¨ g‿b‿r }
+# Ending segment: constant but double length
+End ⇐ {𝕊: (⥊˘1⍉2↑d) + (1 Sl g) ∾⟜(0¨)⊸+⎉1 4‿2 Sl b }
