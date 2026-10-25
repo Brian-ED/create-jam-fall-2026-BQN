@@ -162,6 +162,11 @@ DrawBoulder ← { x‿y𝕊angle : 10
     x‿y‿angle‿boulder_scale DrawTextureCentered boulder_texture
 }
 
+# check if player is giving us any input whatsoever
+AnyInput ← {𝕊@:
+         (0≢r.key.PressedKey⟨⟩) ∨ ({∨´𝕩.button.IsPressed¨ ↕𝕩.buttonCount}r.mouse)
+}
+
 PerFrame ← {𝕊:
     # First frame does setup
     {frame ≡ 0?
@@ -228,11 +233,10 @@ PerFrame ← {𝕊:
         pickups ↩ (0=distanceBetweenObstacles|5+↕∘≠)hillVertices
     }
 
+    # I have no idea why this works
+    timeRight ← 30 > | 60 - 360|angle
     # If you hit timing, you get a boost in speed
-#    {angle?
-#
-#
-#    }
+    { 𝕊@: (AnyInput@) ∧ timeRight ? •Out "yes" ⋄ speed (2 + ⌊2÷˜≠carrying)⊸+↩ ; @ }@
 
     # Drawing boulder character
     center DrawBoulder angle
@@ -250,7 +254,8 @@ PerFrame ← {𝕊:
 
     # Drawing white clock hand for when to hit timing window
     scale ← 0.1
-    ⟨4⥊255, 5⟩ r.draw.Line ≍⟜(+⟜(angle Spin˜ ∾˜radius)) center
+    handColor ← ⊢◶(4⥊255)‿(0‿255‿255‿255) timeRight
+    ⟨handColor, 5⟩ r.draw.Line ≍⟜(+⟜(angle Spin˜ ∾˜radius)) center
 
     # Drawing hill and obstacles
     r.color.darkBrown r.draw.Rectangle ¯40‿¯400⊸+⊸≍˘ hillPosition⊸+˘obstacles
