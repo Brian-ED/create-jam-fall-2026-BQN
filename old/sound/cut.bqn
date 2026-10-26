@@ -19,7 +19,7 @@ dat ← {
   name ⇐ "tiles_B.wav"
   seq ⇐ "ABCDFBADEFEGFDEH"
   Gen ⇐ {𝕊:
-    ga ← (∾˝∾⎉1⎉1‿∞)˜>⥊"ACF"⋈⌜"BDH"
+    ga ← (∾˝∾⎉1⎉1‿∞)˜>⥊"ACF"⋈⌜"ABDH"
     ge ← >⥊(<"")∾⌜´"CEF"‿"DEF"‿"AEF"‿"DEFGH"
     grp ← ga∾ge
     grp 7 _similar RR∘≠⊸⊏ grp
